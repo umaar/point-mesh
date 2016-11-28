@@ -1,0 +1,10 @@
+body {
+	margin: 20px;
+	padding: 20px;
+	display: flex;
+    justify-content: center;
+}
+
+.canvas {
+	outline: 1px solid grey;
+}

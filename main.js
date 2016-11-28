@@ -17,16 +17,18 @@ const allCircles = [];
 
 
 function createCircles(amount) {
-	for (let i = 0; i < amount; i++) {
-		allCircles.push({
-			x: random(0, canvasWidth),
-			y: random(0, canvasHeight),
-			xVelocity: random(-10, -1) / 10,
-			yVelocity: random(1, 10) / 10,
-			size: 3,
-			ttl: random(800, 2000)
-		});
-	}
+	if (amount === 0) return;
+
+	allCircles.push({
+		x: random(0, canvasWidth),
+		y: random(0, canvasHeight),
+		xVelocity: random(-10, -1) / 10,
+		yVelocity: random(1, 10) / 10,
+		size: 3,
+		ttl: random(800, 2000)
+	});
+
+	return createCircles(amount-1);
 }
 
 function allCirclesExcept(except) {

@@ -52,7 +52,10 @@ function isNearby(source, target) {
 function drawLineFrom(source, target, intensity) {
 	const alpha = 1 - (intensity / nearbyThreshold);
 	// console.log(alpha);
-	context.strokeStyle = `rgba(255,255,255,${alpha})`;
+	const red = random(0, 255);
+	const green = random(0, 255);
+	const blue = random(0, 255);
+	context.strokeStyle = `rgba(${red},${green},${blue},${alpha})`;
 	context.beginPath();
 	context.moveTo(source.x, source.y);
 	context.lineTo(target.x, target.y);

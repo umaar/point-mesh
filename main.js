@@ -15,7 +15,6 @@ function init() {
 
 const allCircles = [];
 
-
 function createCircles(amount) {
 	if (amount === 0) return;
 
@@ -51,7 +50,6 @@ function isNearby(source, target) {
 
 function drawLineFrom(source, target, intensity) {
 	const alpha = 1 - (intensity / nearbyThreshold);
-	// console.log(alpha);
 	const red = random(0, 255);
 	const green = random(0, 255);
 	const blue = random(0, 255);
@@ -59,6 +57,7 @@ function drawLineFrom(source, target, intensity) {
 	context.beginPath();
 	context.moveTo(source.x, source.y);
 	context.lineTo(target.x, target.y);
+	context.lineWidth=2;
 	context.stroke();
 }
 
@@ -101,7 +100,7 @@ function draw() {
 	});
 
 	allCircles.forEach(circle => {
-		context.fillStyle = 'white';
+		context.fillStyle = `rgba(255, 255, 255, 0.9)`;
 		context.beginPath();
 		context.arc(circle.x, circle.y, circle.size, 0, 2 * Math.PI);
 		context.stroke();

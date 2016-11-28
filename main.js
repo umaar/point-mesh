@@ -113,7 +113,7 @@ function draw() {
 		});
 	});
 
-	if (Math.random() > 0.997) {
+	if (Math.random() > 0.98) {
 		createCircles(1);
 	}
 

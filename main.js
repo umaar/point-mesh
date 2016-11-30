@@ -3,27 +3,30 @@ function random(min, max) {
     return Math.floor(Math.random()*(max-min+1)+min);
 }
 
+const canvasMargin = 20;
 const canvas = document.querySelector('.canvas');
 const context = canvas.getContext('2d');
 let nearbyThreshold;
 
 function init() {
 	canvasWidth = canvas.width = window.innerWidth * 0.8;
-	canvasHeight = canvas.height = canvasWidth;
+	canvasHeight = canvas.height = Math.min(window.innerHeight - ((canvasMargin * 2) + canvasMargin), canvasWidth);
 	nearbyThreshold = canvasWidth * 0.5;
 }
 
 const allCircles = [];
 
 function createCircles(amount) {
-	if (amount === 0) return;
+	if (amount === 0) {
+		return;
+	}
 
 	allCircles.push({
 		x: random(0, canvasWidth),
 		y: random(0, canvasHeight),
 		xVelocity: random(-10, -1) / 10,
 		yVelocity: random(1, 10) / 10,
-		size: 3,
+		size: random(1,7),
 		ttl: random(800, 2000)
 	});
 
@@ -61,61 +64,68 @@ function drawLineFrom(source, target, intensity) {
 	context.stroke();
 }
 
+function removeIfDead(circle) {
+	if (circle.ttl-- <= 0) {
+		allCircles.splice(allCircles.indexOf(circle), 1);
+	}
+}
+
+function checkBounds(circle) {
+	circle.x += circle.xVelocity;
+	circle.y += circle.yVelocity;
+
+	if (Math.random() > 0.9) {
+		if (circle.x > canvasWidth) {
+			circle.x = canvasWidth;
+			circle.xVelocity = -circle.xVelocity;
+		}
+
+		if (circle.x <= 0) {
+			circle.x = 0;
+			circle.xVelocity = -circle.xVelocity;
+		}
+
+		if (circle.y > canvasHeight) {
+			circle.y = canvasHeight;
+			circle.yVelocity = -circle.yVelocity;
+		}
+
+		if (circle.y <= 0) {
+			circle.y = 0;
+			circle.yVelocity = -circle.yVelocity;
+		}
+	}
+}
+
+function drawCircle(circle) {
+	context.fillStyle = `rgba(255, 255, 255, 0.9)`;
+	context.beginPath();
+	context.arc(circle.x, circle.y, circle.size, 0, 2 * Math.PI);
+	context.stroke();
+	context.fill();
+}
+
+function handleMesh(primaryCircle) {
+	const nearbyCircles = allCirclesExcept(primaryCircle).filter(secondaryCircle => {
+		return isNearby(primaryCircle, secondaryCircle);
+	});
+
+	nearbyCircles.forEach(nearbyCircle => {
+		drawLineFrom(primaryCircle, nearbyCircle, getDistance(primaryCircle, nearbyCircle));
+	});
+}
+
 function draw() {
 	context.clearRect(0, 0, canvasWidth, canvasHeight);
 	context.fillStyle = 'black';
 	context.fillRect(0, 0, canvasWidth, canvasHeight);
 
 	allCircles.forEach(circle => {
-		if (!circle.ttl--) {
-			allCircles.splice(allCircles.indexOf(circle), 1);
-		}
-	});
-
-	allCircles.forEach(circle => {
-		circle.x += circle.xVelocity;
-		circle.y += circle.yVelocity;
-
-		if (Math.random() > 0.9) {
-			if (circle.x > canvasWidth) {
-				circle.x = canvasWidth;
-				circle.xVelocity = -circle.xVelocity;
-			}
-
-			if (circle.x <= 0) {
-				circle.x = 0;
-				circle.xVelocity = -circle.xVelocity;
-			}
-
-			if (circle.y > canvasHeight) {
-				circle.y = canvasHeight;
-				circle.yVelocity = -circle.yVelocity;
-			}
-
-			if (circle.y <= 0) {
-				circle.y = 0;
-				circle.yVelocity = -circle.yVelocity;
-			}
-		}
-	});
-
-	allCircles.forEach(circle => {
-		context.fillStyle = `rgba(255, 255, 255, 0.9)`;
-		context.beginPath();
-		context.arc(circle.x, circle.y, circle.size, 0, 2 * Math.PI);
-		context.stroke();
-		context.fill();
-	});
-
-	allCircles.forEach(primaryCircle => {
-		const nearbyCircles = allCirclesExcept(primaryCircle).filter(secondaryCircle => {
-			return isNearby(primaryCircle, secondaryCircle);
-		});
-
-		nearbyCircles.forEach(nearbyCircle => {
-			drawLineFrom(primaryCircle, nearbyCircle, getDistance(primaryCircle, nearbyCircle));
-		});
-	});
+		removeIfDead(circle);
+		checkBounds(circle);
+		drawCircle(circle);
+		handleMesh(circle);
+	})
 
 	if (Math.random() > 0.98) {
 		createCircles(1);

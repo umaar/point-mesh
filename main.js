@@ -26,11 +26,11 @@ function createCircles(amount) {
 		y: random(0, canvasHeight),
 		xVelocity: random(-10, -1) / 10,
 		yVelocity: random(1, 10) / 10,
-		size: random(1,7),
-		ttl: random(800, 2000)
+		size: random(4, 8),
+		ttl: random(800, 1000)
 	});
 
-	return createCircles(amount-1);
+	return createCircles(amount - 1);
 }
 
 function allCirclesExcept(except) {
@@ -53,14 +53,11 @@ function isNearby(source, target) {
 
 function drawLineFrom(source, target, intensity) {
 	const alpha = 1 - (intensity / nearbyThreshold);
-	const red = random(0, 255);
-	const green = random(0, 255);
-	const blue = random(0, 255);
-	context.strokeStyle = `rgba(${red},${green},${blue},${alpha})`;
+	context.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
 	context.beginPath();
 	context.moveTo(source.x, source.y);
 	context.lineTo(target.x, target.y);
-	context.lineWidth=2;
+	context.lineWidth = 1;
 	context.stroke();
 }
 
@@ -74,26 +71,20 @@ function checkBounds(circle) {
 	circle.x += circle.xVelocity;
 	circle.y += circle.yVelocity;
 
-	if (Math.random() > 0.9) {
-		if (circle.x > canvasWidth) {
-			circle.x = canvasWidth;
-			circle.xVelocity = -circle.xVelocity;
-		}
+	if ((circle.x + circle.size) >= canvasWidth) {
+		circle.xVelocity = -circle.xVelocity;
+	}
 
-		if (circle.x <= 0) {
-			circle.x = 0;
-			circle.xVelocity = -circle.xVelocity;
-		}
+	if ((circle.x - circle.size) <= 0) {
+		circle.xVelocity = -circle.xVelocity;
+	}
 
-		if (circle.y > canvasHeight) {
-			circle.y = canvasHeight;
-			circle.yVelocity = -circle.yVelocity;
-		}
+	if ((circle.y + circle.size) >= canvasHeight) {
+		circle.yVelocity = -circle.yVelocity;
+	}
 
-		if (circle.y <= 0) {
-			circle.y = 0;
-			circle.yVelocity = -circle.yVelocity;
-		}
+	if ((circle.y - circle.size) <= 0) {
+		circle.yVelocity = -circle.yVelocity;
 	}
 }
 
@@ -106,13 +97,10 @@ function drawCircle(circle) {
 }
 
 function handleMesh(primaryCircle) {
-	const nearbyCircles = allCirclesExcept(primaryCircle).filter(secondaryCircle => {
-		return isNearby(primaryCircle, secondaryCircle);
-	});
-
-	nearbyCircles.forEach(nearbyCircle => {
-		drawLineFrom(primaryCircle, nearbyCircle, getDistance(primaryCircle, nearbyCircle));
-	});
+	const nearbyCircles = allCirclesExcept(primaryCircle)
+		.filter(secondaryCircle => isNearby(primaryCircle, secondaryCircle))
+		.forEach(nearbyCircle =>
+			drawLineFrom(primaryCircle, nearbyCircle, getDistance(primaryCircle, nearbyCircle)));
 }
 
 function draw() {
@@ -125,7 +113,7 @@ function draw() {
 		checkBounds(circle);
 		drawCircle(circle);
 		handleMesh(circle);
-	})
+	});
 
 	if (Math.random() > 0.98) {
 		createCircles(1);
@@ -134,9 +122,18 @@ function draw() {
 	requestAnimationFrame(draw);
 }
 
+function onResize() {
+
+}
+
+function handleResize() {
+	window.addEventListener('resize', onResize);
+}
+
 function start() {
 	init();
-	createCircles(6);
+	handleResize();
+	createCircles(10);
 	draw();
 }
 
